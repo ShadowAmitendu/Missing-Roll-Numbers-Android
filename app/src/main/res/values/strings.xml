@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Missing Roll Numbers</string>
+    <string name="enter_starting_roll_number">Starting Roll Number</string>
+    <string name="enter_ending_roll_number">Ending Roll Number</string>
+    <string name="browse_folder">Browse Folder</string>
+    <string name="start_checking">Start Checking</string>
+    <string name="copy_roll_numbers">Copy Roll Numbers!</string>
+</resources>
