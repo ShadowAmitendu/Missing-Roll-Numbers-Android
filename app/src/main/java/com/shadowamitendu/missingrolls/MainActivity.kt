@@ -11,6 +11,7 @@ import android.text.TextWatcher
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -27,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var copyMissingRollBtn: Button
     private lateinit var browseFolderBtn: Button
     private lateinit var startCheckingBtn: Button
+    private lateinit var aboutButton: ImageButton // About button
     private lateinit var scrollView: ScrollView
 
     private var folderUri: Uri? = null
@@ -35,6 +37,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val mainToolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.mainToolbar)
+        setSupportActionBar(mainToolbar)
+
         // Initialize UI elements
         startingRollEditText = findViewById(R.id.startingRollEditText)
         endingRollEditText = findViewById(R.id.endingRollEditText)
@@ -42,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         copyMissingRollBtn = findViewById(R.id.copyMissingRollBtn)
         browseFolderBtn = findViewById(R.id.browseFolderBtn)
         startCheckingBtn = findViewById(R.id.startCheckingBtn)
+        aboutButton = findViewById(R.id.imageButton) // Initialize About button
         scrollView = findViewById(R.id.scrollView)
 
         // Set listeners on buttons
@@ -57,8 +63,17 @@ class MainActivity : AppCompatActivity() {
             openFolderSelector()
         }
 
+        aboutButton.setOnClickListener {
+            openAboutApp() // Navigate to AboutApp
+        }
+
         // Optional: Add input validation
         addTextChangeListeners()
+    }
+
+    private fun openAboutApp() {
+        val intent = Intent(this, AboutApp::class.java)
+        startActivity(intent)
     }
 
     private fun addTextChangeListeners() {
@@ -80,7 +95,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun validateInput() {
-        // Validate the input fields and enable/disable startCheckingBtn accordingly
         val startRoll = startingRollEditText.text.toString().trim()
         val endRoll = endingRollEditText.text.toString().trim()
 
@@ -104,25 +118,20 @@ class MainActivity : AppCompatActivity() {
         try {
             val presentRollNumbers = mutableListOf<Int>()
 
-            // Use DocumentFile to access files within the selected folder
             val documentFile = DocumentFile.fromTreeUri(this, folderUri!!) ?: return
             documentFile.listFiles().forEach { file ->
                 if (file.name?.endsWith(".pdf") == true) {
-                    // Extract roll number from the file name (first 11 characters)
                     val fileName = file.name?.substring(0, 11)
-                    val rollNumber = fileName?.takeLast(3)?.toIntOrNull() // Extract last 3 digits
+                    val rollNumber = fileName?.takeLast(3)?.toIntOrNull()
 
-                    // Collect roll numbers that are present
                     rollNumber?.let {
                         presentRollNumbers.add(it)
                     }
                 }
             }
 
-            // Find missing roll numbers
             val missingRollNumbers = (startRoll..endRoll).filter { it % 1000 !in presentRollNumbers }
 
-            // Update the TextView with missing roll numbers
             missingRollNumbersTextView.text = if (missingRollNumbers.isEmpty()) {
                 "All roll numbers are present!"
             } else {
@@ -148,19 +157,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Open folder selector
     private fun openFolderSelector() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         folderLauncher.launch(intent)
     }
 
-    // Folder selection callback
     private val folderLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == RESULT_OK && result.data != null) {
             folderUri = result.data?.data
 
             if (folderUri != null) {
-                // Grant permission to the folder
                 contentResolver.takePersistableUriPermission(folderUri!!, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
                 Toast.makeText(this, "Folder selected", Toast.LENGTH_SHORT).show()
@@ -171,7 +177,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Dismiss focus from EditText when tapping outside
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             val v = currentFocus
