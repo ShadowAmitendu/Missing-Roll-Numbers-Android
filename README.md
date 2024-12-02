@@ -1,4 +1,4 @@
-# MissingRolls-AndroidVersion
+# Missing Roll Numbers - Android
 
 A simple Android app that helps Class Representatives (CRs) and teachers of MAKAUT easily detect missing roll numbers from PDF filenames for CA1 to CA3. It automatically checks the last three digits of roll numbers in a folder and highlights any missing ones.
 
